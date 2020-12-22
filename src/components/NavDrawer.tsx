@@ -199,7 +199,18 @@ const NavDrawer: React.FC<Props> = ({
             />
           )}
         </Grid>
-        <Grid item>
+        <Grid
+          item
+          data-test={
+            // Added this to check whether the app is in the given state, it would be nicer
+            // to somehow represent the given state within the UI as a specific component
+            authState.matches("refreshing")
+              ? "user-refreshing"
+              : authState.matches("logout")
+              ? "user-logout"
+              : undefined
+          }
+        >
           {currentUser && (
             <>
               <Typography

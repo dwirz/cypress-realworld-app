@@ -87,8 +87,6 @@ export const dataMachine = (machineId: string) =>
           on: {
             FETCH: "loading",
             CREATE: "creating",
-            UPDATE: "updating",
-            DELETE: "deleting",
           },
           initial: "unknown",
           states: {
@@ -97,7 +95,14 @@ export const dataMachine = (machineId: string) =>
                 "": [{ target: "withData", cond: "hasData" }, { target: "withoutData" }],
               },
             },
-            withData: {},
+            withData: {
+              on: {
+                // Moved `UPDATE` and `DELETE` here since no data can be deleted or updated if
+                // there is no data so it is better have it within state `withData`
+                UPDATE: `#${machineId}.updating`,
+                DELETE: `#${machineId}.deleting`,
+              },
+            },
             withoutData: {},
           },
         },

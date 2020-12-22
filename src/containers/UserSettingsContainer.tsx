@@ -27,7 +27,18 @@ const UserSettingsContainer: React.FC<Props> = ({ authService }) => {
   const updateUser = (payload: any) => sendAuth("UPDATE", payload);
 
   return (
-    <Paper className={classes.paper}>
+    <Paper
+      className={classes.paper}
+      data-test={
+        // Added this to check whether the app is in the given state, it would be nicer
+        // to somehow represent the given state within the UI as a specific component
+        authState.matches("updating")
+          ? "user-updating"
+          : authState.matches("refreshing")
+          ? "user-refreshing"
+          : undefined
+      }
+    >
       <Typography component="h2" variant="h6" color="primary" gutterBottom>
         User Settings
       </Typography>
