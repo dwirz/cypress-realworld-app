@@ -42,7 +42,8 @@ const BankAccountsContainer: React.FC<Props> = ({ authService, bankAccountsServi
   };
 
   useEffect(() => {
-    sendBankAccounts("FETCH");
+    // Added `setTimeout` to intercept within tests
+    setTimeout(() => sendBankAccounts("FETCH"));
   }, [sendBankAccounts]);
 
   if (match.url === "/bankaccounts/new" && currentUser?.id) {
@@ -57,13 +58,38 @@ const BankAccountsContainer: React.FC<Props> = ({ authService, bankAccountsServi
   }
 
   return (
-    <Paper className={classes.paper}>
+    <Paper
+      className={classes.paper}
+      data-test={
+        // Added this to check whether the app is in the given state, it would be nicer
+        // to somehow represent the given state within the UI as a specific component
+        `bank-accounts-${bankAccountsState?.toStrings(bankAccountsState.value, "-").pop()}`
+      }
+    >
       <Grid container direction="row" justify="space-between" alignItems="center">
         <Grid item>
           <Typography component="h2" variant="h6" color="primary" gutterBottom>
             Bank Accounts
           </Typography>
         </Grid>
+        {
+          // Added this to check whether the app is in the given state, actually
+          // the `failure`-state should be handle much nicer
+          bankAccountsState?.matches("failure") && (
+            <Grid item>
+              There was an error!
+              <Button
+                variant="contained"
+                color="secondary"
+                size="large"
+                data-test="bank-accounts-refetch"
+                onClick={() => sendBankAccounts("FETCH")}
+              >
+                Retry
+              </Button>
+            </Grid>
+          )
+        }
         <Grid item>
           <Button
             variant="contained"

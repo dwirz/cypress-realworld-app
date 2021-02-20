@@ -12,6 +12,7 @@ import SignInForm from "../components/SignInForm";
 import SignUpForm from "../components/SignUpForm";
 import { bankAccountsMachine } from "../machines/bankAccountsMachine";
 import PrivateRoutesContainer from "./PrivateRoutesContainer";
+import { inspect } from "@xstate/inspect";
 
 // @ts-ignore
 if (window.Cypress) {
@@ -26,14 +27,22 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+// Added `inspect` to understand and visualize the machines of the real-world-app
+const devTools = JSON.parse(
+  typeof window !== "undefined" ? localStorage.getItem("__xstate.inspect") || "false" : "false"
+);
+if (devTools) {
+  inspect({ iframe: false });
+}
+
 const App: React.FC = () => {
   const classes = useStyles();
   const [authState] = useService(authService);
-  const [, , notificationsService] = useMachine(notificationsMachine);
+  const [, , notificationsService] = useMachine(notificationsMachine, { devTools });
 
-  const [, , snackbarService] = useMachine(snackbarMachine);
+  const [, , snackbarService] = useMachine(snackbarMachine, { devTools });
 
-  const [, , bankAccountsService] = useMachine(bankAccountsMachine);
+  const [, , bankAccountsService] = useMachine(bankAccountsMachine, { devTools });
 
   const isLoggedIn =
     authState.matches("authorized") ||
@@ -41,7 +50,12 @@ const App: React.FC = () => {
     authState.matches("updating");
 
   return (
-    <div className={classes.root}>
+    <div
+      className={classes.root}
+      // Added this to check whether the app is in the given state, it would be nicer
+      // to somehow represent the given state within the UI as a specific component
+      data-test={authState.matches("loading") ? "auth-loading" : undefined}
+    >
       <CssBaseline />
 
       {isLoggedIn && (

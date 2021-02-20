@@ -31,7 +31,8 @@ const UserOnboardingContainer: React.FC<Props> = ({ authService, bankAccountsSer
   const currentUser = authState?.context?.user;
 
   useEffect(() => {
-    sendBankAccounts("FETCH");
+    // Added `setTimeout` to intercept within tests
+    setTimeout(() => sendBankAccounts("FETCH"));
   }, [sendBankAccounts]);
 
   const noBankAccounts =

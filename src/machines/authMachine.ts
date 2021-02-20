@@ -1,4 +1,5 @@
 import { Machine, assign, interpret, State } from "xstate";
+import { inspect } from "@xstate/inspect";
 import { omit } from "lodash/fp";
 import { httpClient } from "../utils/asyncUtils";
 import { history } from "../utils/historyUtils";
@@ -150,7 +151,10 @@ export const authMachine = Machine<AuthMachineContext, AuthMachineSchema, AuthMa
 );
 
 // @ts-ignore
-const stateDefinition = JSON.parse(localStorage.getItem("authState"));
+const stateDefinition = JSON.parse(
+  // Added check since the file is run within a node context when using @xstate/test and TestCafe
+  typeof window !== "undefined" ? localStorage.getItem("authState") || "null" : "null"
+);
 
 let resolvedState;
 if (stateDefinition) {
@@ -160,9 +164,18 @@ if (stateDefinition) {
   resolvedState = authMachine.resolveState(previousState);
 }
 
-export const authService = interpret(authMachine)
+const devTools = JSON.parse(
+  // Added check since the file is run within a node context when using @xstate/test and TestCafe
+  typeof window !== "undefined" ? localStorage.getItem("__xstate.inspect") || "false" : "false"
+);
+if (devTools) {
+  inspect({ iframe: false });
+}
+
+export const authService = interpret(authMachine, { devTools })
   .onTransition((state) => {
-    if (state.changed) {
+    // Added check since the file is run within a node context when using @xstate/test and TestCafe
+    if (state.changed && typeof window !== "undefined") {
       localStorage.setItem("authState", JSON.stringify(state));
     }
   })

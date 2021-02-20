@@ -15,13 +15,17 @@ const BankAccountList: React.FC<BankAccountListProps> = ({ bankAccounts, deleteB
     <>
       {bankAccounts?.length > 0 ? (
         <List data-test="bankaccount-list">
-          {bankAccounts.map((bankAccount: BankAccount) => (
-            <BankAccountItem
-              key={bankAccount.id}
-              bankAccount={bankAccount}
-              deleteBankAccount={deleteBankAccount}
-            />
-          ))}
+          {bankAccounts
+            // Sorting the bank accounts to shuffle the deleted to the end within the list adding
+            // this as a sort criteria which can be changed by the user would be nicer
+            .sort((a, b) => (a.isDeleted === b.isDeleted ? 0 : b.isDeleted ? -1 : 1))
+            .map((bankAccount: BankAccount) => (
+              <BankAccountItem
+                key={bankAccount.id}
+                bankAccount={bankAccount}
+                deleteBankAccount={deleteBankAccount}
+              />
+            ))}
         </List>
       ) : (
         <EmptyList entity="Bank Accounts" />
